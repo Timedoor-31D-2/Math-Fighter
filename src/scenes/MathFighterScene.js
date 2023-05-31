@@ -20,6 +20,11 @@ export default class MathFighterScene extends Phaser.Scene{
     this.correctAnswer = undefined
     this.playerAttack = undefined
     this.enemyAttack = undefined
+    this.score = 0
+    this.scoreLabel = undefined
+    this.timer = 10
+    this.timerLabel = undefined
+    this.countdown = undefined
 
     // set button
     this.button1 = undefined
@@ -97,6 +102,14 @@ export default class MathFighterScene extends Phaser.Scene{
     // overlaps
     this.physics.add.overlap(this.slash, this.player, this.spritehit, null, this) // player hit
     this.physics.add.overlap(this.slash, this.enemy, this.spritehit, null, this) // enemy hit
+
+    this.scoreLabel = this.add.text(10, 10, 'Score :', {
+      color: 'white', backgroundColor:'black'
+    }).setDepth(1)
+
+    this.timerLabel = this.add.text(380, 10, 'Time :', {
+      color: 'white', backgroundColor:'black'
+    }).setDepth(1)
   }
 
   update(){
@@ -106,6 +119,7 @@ export default class MathFighterScene extends Phaser.Scene{
         this.createSlash(this.player.x + 60, this.player.y, 4, 600)
       })
       this.playerAttack = true
+      this.score += 10
     }
 
     if (this.correctAnswer === undefined){
@@ -119,6 +133,11 @@ export default class MathFighterScene extends Phaser.Scene{
         this.createSlash(this.enemy.x - 60, this.enemy.y, 2, -600, true)
       })
       this.enemyAttack = true
+    }
+    this.scoreLabel.setText('Score :' + this.score)
+
+    if (this.startGame == true){
+      this.timerLabel.setText('Time :' + this.timer)
     }
   }
 
@@ -185,6 +204,13 @@ export default class MathFighterScene extends Phaser.Scene{
     this.createButtons()
     this.input.on('gameobjectdown', this.addNumber, this)
     this.generateQuestion()
+
+    this.countdown = this.time.addEvent({
+      delay: 1000,
+      callback: this.gameOver,
+      callbackScope: this,
+      loop: true
+    })
   }
 
   createButtons(){
@@ -323,5 +349,12 @@ export default class MathFighterScene extends Phaser.Scene{
       this.correctAnswer = undefined
       this.generateQuestion()
     })
+  }
+
+  gameOver(){
+    this.timer--
+    if(this.timer < 0){
+      this.scene.start('over-scene', { score: this.score })
+    }
   }
 }
